@@ -2,7 +2,7 @@ from nameko.extensions import DependencyProvider
 import mysql.connector
 from mysql.connector import Error
 import mysql.connector.pooling
-import requests as req
+
 
 class DatabaseWrapper:
 
@@ -10,7 +10,61 @@ class DatabaseWrapper:
 
     def __init__(self, connection):
         self.connection = connection
-
+    
+    def registration(self,username,password):
+        cursor=self.connection.cursor(dictionary=True,buffered=True)
+        result=[]
+        sql="SELECT * from user where username = '{}'".format(username)
+        cursor.execute(sql)
+        if(cursor.rowcount>0):
+            cursor.close()
+            result.append("Existed")
+            return result
+        else:
+            sql = "INSERT INTO user VALUES(0,'{}', '{}')".format(username, password)
+            cursor.execute(sql)
+            self.connection.commit()
+            cursor.close()
+            result.append("Registrasi Complete")
+            return result
+            
+    def login(self, username, password):
+        cursor = self.connection.cursor(dictionary=True, buffered=True)
+        result = []
+        sql = "SELECT * from user where username = '{}'".format(username)
+        cursor.execute(sql)
+        if(cursor.rowcount == 0):
+            cursor.close()
+            result.append("User not found")
+            return 0
+        else:
+            resultfetch = cursor.fetchone()
+            if(resultfetch['password'] == password):
+                cursor.close()
+                result.append("Login Berhasil")
+                return 1
+    
+    def getallnews(self):
+        cursor = self.connection.cursor(dictionary=True)
+        result = []
+        sql = "SELECT * FROM news"
+        cursor.execute(sql)
+        for row in cursor.fetchall():
+            result.append({
+                'id': row['id'],
+                'desc': row['desc']
+            })
+        cursor.close()
+        return result
+    
+    def getnewsindex(self, id):
+        cursor = self.connection.cursor(dictionary=True)
+        result = []
+        sql = "SELECT * FROM news WHERE id = {}".format(id)
+        cursor.execute(sql)
+        result = cursor.fetchone()
+        cursor.close()
+        return result
 
 class DatabaseProvider(DependencyProvider):
 
@@ -23,7 +77,7 @@ class DatabaseProvider(DependencyProvider):
                 pool_size=32,
                 pool_reset_session=True,
                 host='127.0.0.1',
-                database='catea_point_of_sales',
+                database='department_news',
                 user='root',
                 password=''
             )
