@@ -28,13 +28,13 @@ class DepartmentService:
         return newsid
     
     @rpc
-    def post(self, desc):
-        post = self.db.post(desc)
+    def post(self, username,news):
+        post = self.db.post(username,news)
         return post
     
     @rpc
-    def edit(self, id, desc):
-        edit = self.db.edit(id, desc)
+    def edit(self, id, news):
+        edit = self.db.edit(id, news)
         return edit
     
     @rpc

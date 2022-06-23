@@ -2,28 +2,28 @@ import json
 from matplotlib.font_manager import json_dump
 from nameko.rpc import RpcProxy
 from nameko.web.handlers import http
+import requests
 from werkzeug.wrappers import Response
 from dependencies.session import SessionProvider
 
 class GatewayService:
-    name='gateway'
+    name = 'gateway'
     database=RpcProxy('department_service')
     session_provider = SessionProvider()
 
     @http('POST','/registration')
     def registration(self,request):
-        data = format(request.get_data(as_text=True))
-        arr  =  data.split("&")
-
         username = "" 
         password = "" 
+        data = format(request.get_data(as_text=True))
+        array  =  data.split("&")
 
-        for separator in arr:
-            node = separator.split("=")
-            if node[0] == "username":
-                username = node[1]
-            if node[0] == "password":
-                password = node[1]
+        for separator in array:
+            cnt = separator.split("=")
+            if cnt[0] == "username":
+                username = cnt[1]
+            if cnt[0] == "password":
+                password = cnt[1]
         print(password)
         print(username)
         data_regis = self.database.registration(username, password)
@@ -41,9 +41,9 @@ class GatewayService:
                 username = cnt[1]
             if cnt[0] == "password":
                 password = cnt[1]
-        flags = self.database.login(username, password)
+        check = self.database.login(username, password)
         
-        if(flags == 1):
+        if(check == 1):
             user_data = {
                 'username': username,
                 'password': password
@@ -62,19 +62,32 @@ class GatewayService:
         cookies = request.cookies
         if cookies:
             confirm = self.session_provider.delete_session(cookies['SESSID'])
-            if (confirm):
-                response = Response('Logout Successful')
-                response.delete_cookie('SESSID')
-            else:
-                response = Response("Logout Failed")
-            return response
+            response = Response('Logout Successful')
+            response.delete_cookie('SESSID')
     
     @http('GET', '/getallnews')
-    def getallnews(self, request):
-        news = self.database.getallnews()
-        return json.dumps(news)
+    def getallnews(self, request): 
+        return json.dumps(self.database.getallnews())
 
     @http('GET', '/getnewsindex/<int:id>')
     def getnewsindex(self, request,id):
-        news = self.database.getnewsindex(id)
-        return json.dumps(news)
+        return json.dumps(self.database.getnewsindex(id))
+
+    @http('POST','/post')
+    def post(self,request):
+        username = "" 
+        news = "" 
+        data=format(request.get_data(as_text=True))
+        array=data.split("&")
+        for file in array:
+            cnt     = file.split("=")
+            if cnt[0] == "username":
+                username = cnt[1]
+            if cnt[0] == "news":
+                news = cnt[1]
+        return json.dumps(self.database.post(username, news))
+
+    @http('DELETE','/delete/<int:id>')
+    def delete(self,request,id):
+        delete=self.database.delete(id)
+        return json.dumps(delete)

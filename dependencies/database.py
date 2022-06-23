@@ -13,20 +13,17 @@ class DatabaseWrapper:
     
     def registration(self,username,password):
         cursor=self.connection.cursor(dictionary=True,buffered=True)
-        result=[]
         sql="SELECT * from user where username = '{}'".format(username)
         cursor.execute(sql)
         if(cursor.rowcount>0):
             cursor.close()
-            result.append("Existed")
-            return result
+            return "Existed"
         else:
             sql = "INSERT INTO user VALUES(0,'{}', '{}')".format(username, password)
             cursor.execute(sql)
             self.connection.commit()
             cursor.close()
-            result.append("Registrasi Complete")
-            return result
+            return "Complete"
             
     def login(self, username, password):
         cursor = self.connection.cursor(dictionary=True, buffered=True)
@@ -52,7 +49,8 @@ class DatabaseWrapper:
         for row in cursor.fetchall():
             result.append({
                 'id': row['id'],
-                'desc': row['desc']
+                'username':row['username'],
+                'news': row['news']
             })
         cursor.close()
         return result
@@ -65,6 +63,23 @@ class DatabaseWrapper:
         result = cursor.fetchone()
         cursor.close()
         return result
+    
+    def delete(self,id):
+        cursor = self.connection.cursor(dictionary=True,buffered=True)
+        sql= "DELETE FROM news WHERE id = {}".format(id)
+        cursor.execute(sql)
+        self.connection.commit()
+        cursor.close()
+        return "Success"
+    
+    def post(self,username,news):
+        cursor = self.connection.cursor(dictionary=True,buffered=True)
+        sql= "INSERT INTO news VALUES(0,'{}','{}',CURRENT_DATE)".format(username,news)
+        cursor.execute(sql)
+        self.connection.commit()
+        cursor.close()
+        return "Success"
+
 
 class DatabaseProvider(DependencyProvider):
 
