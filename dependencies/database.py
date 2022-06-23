@@ -79,7 +79,16 @@ class DatabaseWrapper:
         self.connection.commit()
         cursor.close()
         return "Success"
-
+    
+    def edit(self,id,news):
+        cursor=self.connection.cursor(dictionary=True,buffered=True)
+        sql="SELECT * news WHERE id = {}".format(id)
+        cursor.execute(sql)
+        sql="UPDATE news SET updatenews='{}'".format(news)
+        cursor.execute(sql)
+        self.connection.commit()
+        cursor.close()
+        return "Succes"
 
 class DatabaseProvider(DependencyProvider):
 

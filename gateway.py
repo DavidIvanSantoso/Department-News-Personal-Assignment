@@ -75,19 +75,41 @@ class GatewayService:
 
     @http('POST','/post')
     def post(self,request):
-        username = "" 
-        news = "" 
-        data=format(request.get_data(as_text=True))
-        array=data.split("&")
-        for file in array:
-            cnt     = file.split("=")
-            if cnt[0] == "username":
-                username = cnt[1]
-            if cnt[0] == "news":
-                news = cnt[1]
-        return json.dumps(self.database.post(username, news))
+        cookies=request.cookies
+        if(cookies):
+            username = "" 
+            news = "" 
+            data=format(request.get_data(as_text=True))
+            array=data.split("&")
+            for file in array:
+                cnt     = file.split("=")
+                if cnt[0] == "username":
+                    username = cnt[1]
+                if cnt[0] == "news":
+                    news = cnt[1]
+            return json.dumps(self.database.post(username, news))
+        else:
+            return "Login first"
 
     @http('DELETE','/delete/<int:id>')
     def delete(self,request,id):
-        delete=self.database.delete(id)
-        return json.dumps(delete)
+        cookies=request.cookies
+        if(cookies):
+            delete=self.database.delete(id)
+            return json.dumps(delete)
+        else:
+            return "Login first"
+    
+    @http('POST','/update/<int:id>')
+    def edit(self,request,id,news):
+        cookies=request.cookies
+        if(cookies):
+            news=""
+            data=format(request.get_data(as_text=True,buffered=True))
+            array=data.split("&")
+            for file in array:
+                cnt     = file.split("=")
+                if cnt[0] == "news":
+                    news = cnt[1]
+            return json.dumps(self.database.edit(id,news))
+        

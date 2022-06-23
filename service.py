@@ -33,11 +33,11 @@ class DepartmentService:
         return post
     
     @rpc
-    def edit(self, id, news):
-        edit = self.db.edit(id, news)
-        return edit
-    
-    @rpc
     def delete(self, id):
         delete = self.db.delete(id)
         return delete
+    
+    @rpc
+    def edit(self, id, news):
+        edit = self.db.edit(id, news)
+        return edit
